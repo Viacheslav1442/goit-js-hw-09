@@ -1,6 +1,6 @@
 import SimpleLightbox from 'simplelightbox';
 import 'simplelightbox/dist/simple-lightbox.min.css';
-import { galleryItems } from './gallery-items.js'; // масив об'єктів
+import { galleryItems } from 'src/js/gallery-items.js'; // масив об'єктів
 
 const galleryContainer = document.querySelector('.gallery');
 
