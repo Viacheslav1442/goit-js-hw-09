@@ -1,7 +1,7 @@
 const STORAGE_KEY = 'feedback-msg';
 const form = document.querySelector('.feedback-form');
 const textArea = document.querySelector('textarea');
-const formData = {}; // глобальний об'єкт стану форми
+let formData = {}; // глобальний об'єкт стану форми
 
 // Стилізація
 const submitBtn = form.lastElementChild;
@@ -12,18 +12,17 @@ const inputItems = Array.from(form.firstElementChild.children);
 inputItems.forEach(el => el.classList.add('input'));
 textArea.classList.add('style-textarea');
 
-// Завантаження даних із localStorage
+// Завантаження збережених даних
 populateForm();
 
 // Обробка подій
 form.addEventListener('submit', handleFormSubmit);
 form.addEventListener('input', handleFormInput);
 
-// Записуємо дані в formData і localStorage при кожному введенні
+// Зберігаємо поточне введення у localStorage
 function handleFormInput(event) {
     formData[event.target.name] = event.target.value;
-    localStorage.removeItem(STORAGE_KEY);
-    form.reset();
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(formData));
 }
 
 // Обробка надсилання форми
@@ -39,24 +38,22 @@ function handleFormSubmit(event) {
     }
 
     console.log('Надіслані дані:', data);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-    form.reset();
 
-    // Очищення глобального formData
-    Object.keys(formData).forEach(key => delete formData[key]);
+    localStorage.removeItem(STORAGE_KEY); // очищення після успішного сабміту
+    form.reset();
+    formData = {}; // очищення глобального стану
 }
 
-// Заповнюємо форму зі збережених даних
+// Відновлюємо введення зі збережених даних
 function populateForm() {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (!saved) return;
 
     try {
-        const parsed = JSON.parse(saved);
-        for (const key in parsed) {
+        formData = JSON.parse(saved);
+        for (const key in formData) {
             if (form.elements[key]) {
-                form.elements[key].value = parsed[key];
-                formData[key] = parsed[key]; // також оновлюємо formData
+                form.elements[key].value = formData[key];
             }
         }
     } catch (error) {
