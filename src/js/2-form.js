@@ -22,7 +22,8 @@ form.addEventListener('input', handleFormInput);
 // Записуємо дані в formData і localStorage при кожному введенні
 function handleFormInput(event) {
     formData[event.target.name] = event.target.value;
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(formData));
+    localStorage.removeItem(STORAGE_KEY);
+    form.reset();
 }
 
 // Обробка надсилання форми
