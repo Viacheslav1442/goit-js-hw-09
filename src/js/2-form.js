@@ -1,32 +1,67 @@
-const form = document.querySelector('.feedback-form');
-const STORAGE_KEY = 'feedback-form-state';
-let formData = { email: '', message: '' };
+const STORAGE_KEY = 'feedback-msg';
 
-// Відновлення даних з localStorage
-const savedData = JSON.parse(localStorage.getItem(STORAGE_KEY));
-if (savedData) {
-    formData = savedData;
-    form.email.value = savedData.email || '';
-    form.message.value = savedData.message || '';
+const login = document.querySelector('.feedback-form');
+const textAreaJs = document.querySelector('textarea');
+
+populateTextarea();
+const btnForCs = login.lastElementChild;
+btnForCs.classList.add('btn-login');
+const loginCs = Array.from(login.children);
+loginCs.forEach(element => {
+    element.classList.add('login-items-form');
+});
+const inputCs = Array.from(login.firstElementChild.children);
+inputCs.forEach(element => {
+    element.classList.add('input');
+});
+textAreaJs.classList.add('style-textarea');
+
+login.addEventListener('submit', handleFormSubmit);
+login.addEventListener('input', handleFormFocusout);
+
+function handleFormSubmit(event) {
+    event.preventDefault();
+    try {
+        const form = event.target;
+        const formData = new FormData(form);
+        const data = Object.fromEntries(formData);
+
+        const filledFields = Object.values(data).filter(
+            value => value.trim() !== ''
+        );
+
+        if (filledFields.length < 2) {
+            throw new Error('Недостатньо заповнених полів');
+        }
+
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        form.reset();
+    } catch (error) {
+        alert('⚠️ Opps... Some error occurs');
+    }
 }
 
-// Відстеження змін
-form.addEventListener('input', e => {
-    formData[e.target.name] = e.target.value.trim();
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(formData));
-});
+function handleFormFocusout(event) {
+    const form = login;
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
 
-// Сабміт форми
-form.addEventListener('submit', e => {
-    e.preventDefault();
+function populateTextarea() {
+    const savedLsData = localStorage.getItem(STORAGE_KEY);
+    if (!savedLsData) return;
 
-    if (!formData.email || !formData.message) {
-        alert('Fill please all fields');
-        return;
+    try {
+        const dataFormLs = JSON.parse(savedLsData);
+        const formElements = login.elements;
+
+        for (const key in dataFormLs) {
+            if (formElements[key]) {
+                formElements[key].value = dataFormLs[key];
+            }
+        }
+    } catch (error) {
+        alert('⚠️ Opps... Some error occurs');
     }
-
-    console.log(formData);
-    localStorage.removeItem(STORAGE_KEY);
-    formData = { email: '', message: '' };
-    form.reset();
-});
+}
