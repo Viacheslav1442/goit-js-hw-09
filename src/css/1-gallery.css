@@ -6,11 +6,12 @@
     padding: 0;
     padding-left: 156px;
     padding-right: 156px;
-    list-style: none;
+
 }
 
 .gallery-item {
     margin: 0 auto;
+    list-style: none;
 }
 
 .gallery-image {
