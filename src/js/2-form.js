@@ -1,67 +1,64 @@
 const STORAGE_KEY = 'feedback-msg';
+const form = document.querySelector('.feedback-form');
+const textArea = document.querySelector('textarea');
+const formData = {}; // глобальний об'єкт стану форми
 
-const login = document.querySelector('.feedback-form');
-const textAreaJs = document.querySelector('textarea');
+// Стилізація
+const submitBtn = form.lastElementChild;
+submitBtn.classList.add('btn-login');
+const formItems = Array.from(form.children);
+formItems.forEach(el => el.classList.add('login-items-form'));
+const inputItems = Array.from(form.firstElementChild.children);
+inputItems.forEach(el => el.classList.add('input'));
+textArea.classList.add('style-textarea');
 
-populateTextarea();
-const btnForCs = login.lastElementChild;
-btnForCs.classList.add('btn-login');
-const loginCs = Array.from(login.children);
-loginCs.forEach(element => {
-    element.classList.add('login-items-form');
-});
-const inputCs = Array.from(login.firstElementChild.children);
-inputCs.forEach(element => {
-    element.classList.add('input');
-});
-textAreaJs.classList.add('style-textarea');
+// Завантаження даних із localStorage
+populateForm();
 
-login.addEventListener('submit', handleFormSubmit);
-login.addEventListener('input', handleFormFocusout);
+// Обробка подій
+form.addEventListener('submit', handleFormSubmit);
+form.addEventListener('input', handleFormInput);
 
+// Записуємо дані в formData і localStorage при кожному введенні
+function handleFormInput(event) {
+    formData[event.target.name] = event.target.value;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(formData));
+}
+
+// Обробка надсилання форми
 function handleFormSubmit(event) {
     event.preventDefault();
-    try {
-        const form = event.target;
-        const formData = new FormData(form);
-        const data = Object.fromEntries(formData);
 
-        const filledFields = Object.values(data).filter(
-            value => value.trim() !== ''
-        );
+    const data = Object.fromEntries(new FormData(form));
+    const isFormComplete = Object.values(data).every(value => value.trim() !== '');
 
-        if (filledFields.length < 2) {
-            throw new Error('Недостатньо заповнених полів');
-        }
-
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-        form.reset();
-    } catch (error) {
-        alert('⚠️ Opps... Some error occurs');
+    if (!isFormComplete) {
+        alert('Будь ласка, заповніть усі поля перед відправленням форми.');
+        return;
     }
-}
 
-function handleFormFocusout(event) {
-    const form = login;
-    const formData = new FormData(form);
-    const data = Object.fromEntries(formData);
+    console.log('Надіслані дані:', data);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    form.reset();
+
+    // Очищення глобального formData
+    Object.keys(formData).forEach(key => delete formData[key]);
 }
 
-function populateTextarea() {
-    const savedLsData = localStorage.getItem(STORAGE_KEY);
-    if (!savedLsData) return;
+// Заповнюємо форму зі збережених даних
+function populateForm() {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (!saved) return;
 
     try {
-        const dataFormLs = JSON.parse(savedLsData);
-        const formElements = login.elements;
-
-        for (const key in dataFormLs) {
-            if (formElements[key]) {
-                formElements[key].value = dataFormLs[key];
+        const parsed = JSON.parse(saved);
+        for (const key in parsed) {
+            if (form.elements[key]) {
+                form.elements[key].value = parsed[key];
+                formData[key] = parsed[key]; // також оновлюємо formData
             }
         }
     } catch (error) {
-        alert('⚠️ Opps... Some error occurs');
+        alert('⚠️ Помилка при завантаженні даних із localStorage.');
     }
 }
